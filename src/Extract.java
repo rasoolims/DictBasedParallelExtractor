@@ -1,5 +1,7 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashMap;
 
 class Pair<T1, T2> {
@@ -66,11 +68,13 @@ public class Extract {
         HashMap<String, Pair<String, Float>> bestAlignment = new HashMap<>();
         int lineNum = 0;
         while ((srcLine = srcReader.readLine()) != null && (dstLine = dstReader.readLine()) != null) {
-            String srcSen = srcLine.trim().toLowerCase();
-            String dstSen = dstLine.trim().toLowerCase();
+            srcLine = srcLine.trim();
+            dstLine = dstLine.trim();
+            String srcSen = srcLine.toLowerCase();
+            String dstSen = dstLine.toLowerCase();
             float alignProb = alignProb(dict, srcSen, dstSen);
             if (!Float.isInfinite(alignProb)) {
-                if (!bestAlignment.containsKey(srcSen) || bestAlignment.get(srcSen).second < alignProb)
+                if (!bestAlignment.containsKey(srcLine) || bestAlignment.get(srcLine).second < alignProb)
                     bestAlignment.put(srcLine, new Pair<>(dstSen, alignProb));
             }
             lineNum++;
@@ -78,6 +82,14 @@ public class Extract {
                 System.out.print(bestAlignment.size() + "/" + lineNum + "\r");
         }
         System.out.print(bestAlignment.size() + "/" + lineNum + "\n");
+
+        System.out.println("Writing alignments");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
+        for (String srcSen : bestAlignment.keySet()) {
+            writer.write(srcSen + "\t" + bestAlignment.get(srcSen).first + "\t" + Math.exp(bestAlignment.get(srcSen).second) + "\n");
+        }
+        System.out.println("Writing alignments done!");
+
 
     }
 }
