@@ -59,8 +59,8 @@ public class Extract {
     public static void main(String[] args) throws Exception {
         HashMap dict = readDict(args[0]);
 
-        BufferedReader srcReader = new BufferedReader(new FileReader(args[2]));
-        BufferedReader dstReader = new BufferedReader(new FileReader(args[3]));
+        BufferedReader srcReader = new BufferedReader(new FileReader(args[1]));
+        BufferedReader dstReader = new BufferedReader(new FileReader(args[2]));
         String srcLine, dstLine;
 
         HashMap<String, Pair<String, Float>> bestAlignment = new HashMap<>();
