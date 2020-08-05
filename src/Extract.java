@@ -2,6 +2,16 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.HashMap;
 
+class Pair<T1, T2> {
+    public T1 first;
+    public T2 second;
+
+    public Pair(T1 first, T2 second) {
+        this.first = first;
+        this.second = second;
+    }
+}
+
 public class Extract {
     static HashMap<String, HashMap<String, Float>> readDict(String path) throws Exception {
         HashMap<String, HashMap<String, Float>> dict = new HashMap<>();
@@ -21,9 +31,52 @@ public class Extract {
         return dict;
     }
 
+    static float alignProb(HashMap<String, HashMap<String, Float>> dict, String srcSen, String dstSen) {
+        float logProb = 0f;
+        String[] srcWords = srcSen.split(" ");
+        String[] dstWords = dstSen.split(" ");
+
+        int wordCounts = 0;
+        for (String dstWord : dstWords) {
+            float highest = 0;
+            for (String srcWord : srcWords) {
+                if (dict.containsKey(srcWord) && dict.get(srcWord).containsKey(dstWord)) {
+                    float wp = dict.get(srcWord).get(dstWord);
+                    if (wp > highest)
+                        highest = wp;
+                }
+            }
+            if (highest > 0) {
+                logProb += Math.log(highest);
+                wordCounts++;
+            }
+        }
+        if (wordCounts == 0) // No alignment found!
+            return Float.NEGATIVE_INFINITY;
+        return logProb / wordCounts;
+    }
+
     public static void main(String[] args) throws Exception {
         HashMap dict = readDict(args[0]);
 
+        BufferedReader srcReader = new BufferedReader(new FileReader(args[2]));
+        BufferedReader dstReader = new BufferedReader(new FileReader(args[3]));
+        String srcLine, dstLine;
+
+        HashMap<String, Pair<String, Float>> bestAlignment = new HashMap<>();
+        int lineNum = 0;
+        while ((srcLine = srcReader.readLine()) != null && (dstLine = dstReader.readLine()) != null) {
+            String srcSen = srcLine.trim().toLowerCase();
+            String dstSen = dstLine.trim().toLowerCase();
+            float alignProb = alignProb(dict, srcSen, dstSen);
+            if (!Float.isInfinite(alignProb)) {
+                if (!bestAlignment.containsKey(srcSen) || bestAlignment.get(srcSen).second < alignProb)
+                    bestAlignment.put(srcLine, new Pair<>(dstSen, alignProb));
+            }
+            lineNum++;
+            System.out.println(bestAlignment.size() + "/" + lineNum + "\r");
+        }
+        System.out.println(bestAlignment.size() + "/" + lineNum + "\n");
 
     }
 }
