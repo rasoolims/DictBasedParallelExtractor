@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 
 class Pair<T1, T2> {
     public T1 first;
@@ -15,16 +16,36 @@ class Pair<T1, T2> {
 }
 
 public class Extract {
+    static HashSet<String> ignoreWords = new HashSet<>();
+
     static HashMap<String, HashMap<String, Float>> readDict(String path) throws Exception {
         HashMap<String, HashMap<String, Float>> dict = new HashMap<>();
+        ignoreWords.add("&apos;");
+        ignoreWords.add("&");
+        ignoreWords.add(";");
+        ignoreWords.add("!");
+        ignoreWords.add("?");
+        ignoreWords.add("(");
+        ignoreWords.add(")");
+        ignoreWords.add("[");
+        ignoreWords.add("]");
+        ignoreWords.add("{");
+        ignoreWords.add("}");
+        ignoreWords.add("؟");
+        ignoreWords.add("!");
+        ignoreWords.add(".");
 
         BufferedReader reader = new BufferedReader(new FileReader(path));
         String line;
         while ((line = reader.readLine()) != null) {
             String[] spl = line.trim().split("\t");
             String word = spl[0];
+            if (ignoreWords.contains(word) || word.startsWith("&"))
+                continue;
             dict.put(word, new HashMap<>());
             for (int j = 1; j < spl.length - 1; j += 2) {
+                if (ignoreWords.contains(spl[j]) || spl[j].startsWith("&"))
+                    continue;
                 float prob = Float.parseFloat(spl[j + 1]);
                 dict.get(word).put(spl[j], prob);
             }
