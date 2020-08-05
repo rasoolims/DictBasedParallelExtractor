@@ -55,7 +55,7 @@ public class Extract {
                 wordCounts++;
             }
         }
-        if (wordCounts >= 3) // No alignment found!
+        if (wordCounts < 3) // No alignment found!
             return Float.NEGATIVE_INFINITY;
         return logProb / wordCounts;
     }
