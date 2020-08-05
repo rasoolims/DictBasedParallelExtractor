@@ -89,6 +89,7 @@ public class Extract {
         String srcLine, dstLine;
 
         HashMap<String, Pair<String, Float>> bestAlignment = new HashMap<>();
+        HashMap<String, Pair<String, Float>> bestRevAlignment = new HashMap<>();
         int lineNum = 0;
         while ((srcLine = srcReader.readLine()) != null && (dstLine = dstReader.readLine()) != null) {
             srcLine = srcLine.trim();
@@ -99,21 +100,29 @@ public class Extract {
             if (!Float.isInfinite(alignProb)) {
                 if (!bestAlignment.containsKey(srcLine) || bestAlignment.get(srcLine).second < alignProb)
                     bestAlignment.put(srcLine, new Pair<>(dstSen, alignProb));
+                if (!bestRevAlignment.containsKey(dstLine) || bestRevAlignment.get(dstLine).second < alignProb)
+                    bestRevAlignment.put(dstLine, new Pair<>(srcLine, alignProb));
             }
             lineNum++;
             if (lineNum % 10000 == 0)
-                System.out.print(bestAlignment.size() + "/" + lineNum + "\r");
+                System.out.print(bestAlignment.size() + "/" + bestRevAlignment.size() + "/" + lineNum + "\r");
         }
         System.out.print(bestAlignment.size() + "/" + lineNum + "\n");
 
         System.out.println("Writing alignments");
         BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
+        int written = 0;
         for (String srcSen : bestAlignment.keySet()) {
             String dstSen = bestAlignment.get(srcSen).first;
-            double prob = Math.exp(bestAlignment.get(srcSen).second);
-            writer.write(srcSen + "\t" + dstSen + "\t" + prob + "\n");
+            if (bestRevAlignment.containsKey(dstSen) && bestRevAlignment.get(dstSen).first.equals(srcSen)) {
+                double prob = Math.exp(bestAlignment.get(srcSen).second);
+                double probRev = Math.exp(bestRevAlignment.get(dstSen).second);
+                double allProb = prob * probRev;
+                writer.write(srcSen + "\t" + dstSen + "\t" + prob + "\t" + probRev + "\t" + allProb + "\n");
+                written++;
+            }
         }
-        System.out.println("Writing alignments done!");
+        System.out.println("Writing alignments " + written + " done!");
 
 
     }
