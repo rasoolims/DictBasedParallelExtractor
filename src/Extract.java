@@ -78,7 +78,7 @@ public class Extract {
                     bestAlignment.put(srcLine, new Pair<>(dstSen, alignProb));
             }
             lineNum++;
-            if (lineNum % 1000 == 0)
+            if (lineNum % 10000 == 0)
                 System.out.print(bestAlignment.size() + "/" + lineNum + "\r");
         }
         System.out.print(bestAlignment.size() + "/" + lineNum + "\n");
