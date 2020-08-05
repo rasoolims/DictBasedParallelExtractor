@@ -35,6 +35,8 @@ public class Extract {
 
     static float alignProb(HashMap<String, HashMap<String, Float>> dict, String srcSen, String dstSen) {
         float logProb = 0f;
+        if (srcSen.equals(dstSen))
+            return Float.NEGATIVE_INFINITY;
         String[] srcWords = srcSen.split(" ");
         String[] dstWords = dstSen.split(" ");
 
@@ -86,7 +88,9 @@ public class Extract {
         System.out.println("Writing alignments");
         BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
         for (String srcSen : bestAlignment.keySet()) {
-            writer.write(srcSen + "\t" + bestAlignment.get(srcSen).first + "\t" + Math.exp(bestAlignment.get(srcSen).second) + "\n");
+            String dstSen = bestAlignment.get(srcSen).first;
+            double prob = Math.exp(bestAlignment.get(srcSen).second);
+            writer.write(srcSen + "\t" + dstSen + "\t" + prob + "\n");
         }
         System.out.println("Writing alignments done!");
 
